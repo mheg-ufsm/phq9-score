@@ -15,8 +15,8 @@ library(dplyr)
 #reticulate::use_condaenv("r-reticulate")
 #reticulate::import("kaleido")
 
-#py_install(c('kaleido', 'plotly'))
-#reticulate::import('kaleido')
+py_install(c('kaleido', 'plotly'))
+reticulate::import('kaleido')
 
 ### -------------------------------------------------------------------- ###
 
@@ -164,16 +164,18 @@ ui <- fluidPage(
     footer {
       text-align: center;
       padding: 3px;
-      background-color: #007BFF;
-      color: white;
+      background-color: #f7f8fa;
+      color: black;
+      border-radius: 12px;
+      margin-top: 10px;
+      padding-top: 10px;
     }
     
-    #footer-link {
-      color: white;
-      text-decoration: none;
+    .footer-link {
+      color: black;
+      text-decoration: none !important;
     }
   ")),
-  
   fluidRow(
     div(id = "header-logos",
       column(4,tags$img(src = 'img/cism.svg', id = "cism-logo")),
@@ -242,8 +244,13 @@ ui <- fluidPage(
   ),
   HTML("
        <footer>
-          <a id='footer-link' href='https://joaopacheco.quarto.pub/mental-health-epidemiology-group/'>© Mental Health Epidemiology Group</a>
-          <p>Auxiliaram na construção do App:</p>
+          <a class='footer-link' href='https://joaopacheco.quarto.pub/mental-health-epidemiology-group/'>© Mental Health Epidemiology Group</a>
+          <p>
+            Auxiliaram na construção do App: 
+            <a class='footer-link' href='https://www.linkedin.com/in/andresimi/?originalSubdomain=br'>André Simioni</a> 
+            e
+            <a class='footer-link' href='https://www.linkedin.com/in/igor-duarte-54478ba3/?originalSubdomain=br'>Igor Duarte</a>
+          </p>
        </footer>
   ")
 )

@@ -1,0 +1,12 @@
+name: phq9-score
+title: phq9-score
+username: mheg
+account: mheg
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10173002
+bundleId: 7795853
+url: https://mheg.shinyapps.io/phq9-score/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
