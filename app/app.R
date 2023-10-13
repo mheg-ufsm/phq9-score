@@ -1,13 +1,6 @@
-library(shiny)
-library(plotly)
-library(readr)
-library(mirtCAT)
-library(rsconnect)
-library(emayili)
-library(htmltools)
-library(reticulate)
-library(glue)
-library(dplyr)
+library(shiny); library(plotly); library(readr); library(mirtCAT); library(rsconnect);
+library(emayili); library(htmltools); library(reticulate); library(glue); library(dplyr);
+library(gridExtra); library(grid); library(shinyjs)
 
 ### ----------------- Não Alterar ------------------------------------- ###
 
@@ -53,8 +46,8 @@ perguntas <- c(
 smtp <- server(
   host = "smtp.gmail.com",
   port = 465,
-  username = "mentalscoreapp@gmail.com",
-  password = "joea djwi erie grzv"
+  username = "mhegscoreapp@gmail.com",
+  password = "kidi gowk ujvv arkl"
 )
 
 item <- function(id, label) {
@@ -68,114 +61,10 @@ item <- function(id, label) {
 
 
 ui <- fluidPage(
-  tags$style(HTML("
-    
-    #cism-logo, #ppg-logo, #mh-logo {
-        height: 250px;
-        width: 250px;
-        margin: 0px;
-    }
-    
-    @media (max-width: 600px) {
-      #cism-logo, #ppg-logo, #mh-logo {
-          display: none
-      }
-    }
-    
-    h2 {
-        font-weight: bold; /* Título em negrito */
-        margin-bottom: 5px; /* Espaço abaixo do título */
-        color: #333; /* Cor do texto */
-    }
-    
-    h3 {
-        font-style: italic; /* Texto em itálico */
-        margin-bottom: 5px; /* Espaço abaixo do subtítulo */
-        color: #555; /* Cor do texto */
-    }
-    
-    /* Personalizando o painel */
-    .well { 
-        background-color: #f7f8fa;     
-        border: 1px solid #e1e4e8;     /* Bordas sutis */
-        border-radius: 12px;           
-        padding: 25px;                 
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);  /* Sombra leve */
-    }
-
-    /* Espaçamento entre os elementos */
-    .form-group {                      
-        margin-bottom: 20px;
-    }
-
-    /* Personalização dos botões */
-    button {
-        border-radius: 8px;
-        transition: background-color 0.3s, transform 0.3s; /* Transição suave para o hover */
-    }
-
-    button:hover {
-        background-color: #007BFF; /* Cor de hover */
-        transform: scale(1.05); /* Efeito de aumento sutil no hover */
-    }
-
-    /* Tipografia */
-    body {
-        font-family: 'Helvetica Neue', sans-serif; 
-    }
-  
-    #resultado {
-      font-size: 20px;
-      text-align: left;
-    }
-    #header-logos img {
-      margin: 50px;
-    }
-  
-    /* ... Suas outras estilizações ... */
-
-    /* Efeito de aproximação nos radiobuttons */
-    input[type='radio'] {
-        transition: transform 0.3s; /* Transição suave para o hover */
-    }
-
-    input[type='radio']:hover {
-        transform: scale(1.2); /* Efeito de aumento sutil no hover */
-    }
-  
-    #calcular {
-          background-color: #45C4B0;
-          color: white;
-          box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);  // Sombra leve
-    }
-  
-    /* Cor de fundo e sombra para o gráfico */
-      .js-plotly-plot .plotly {
-        background-color: #f7f8fa;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        border-radius: 12px;
-    }
-
-    /* Tipografia do gráfico */
-    .js-plotly-plot .plotly text {
-        font-family: 'Helvetica Neue', sans-serif; 
-    }
-    
-    footer {
-      text-align: center;
-      padding: 3px;
-      background-color: #f7f8fa;
-      color: black;
-      border-radius: 12px;
-      margin-top: 10px;
-      padding-top: 10px;
-    }
-    
-    .footer-link {
-      color: black;
-      text-decoration: none !important;
-    }
-  ")),
+  useShinyjs(),
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
+  ),
   fluidRow(
     div(id = "header-logos",
       column(4,tags$img(src = 'img/cism.svg', id = "cism-logo")),
@@ -252,11 +141,14 @@ ui <- fluidPage(
             <a class='footer-link' href='https://www.linkedin.com/in/igor-duarte-54478ba3/?originalSubdomain=br'>Igor Duarte</a>
           </p>
        </footer>
-  ")
+  "),
 )
 
 server <- function(input, output) {
   
+  shinyjs::disable("download")
+  shinyjs::disable("sendemail")
+
   valores <- reactiveValues(escoreT = NULL)
   
   observeEvent(input$calcular, {
@@ -283,51 +175,73 @@ server <- function(input, output) {
     if(!is.na(theta)) {
       valores$escoreT <- 50 + 10 * theta
     }
+    
+    shinyjs::enable("download")
+    
+    shinyjs::enable("sendemail")
   })
   
   observeEvent(input$sendemail, {
     
-    save_image(p = thePlot(), file = 'plot.png', width = 700, height = 700)
-    
     email <- envelope(
       to = input$dest,
       from = input$sender,
-      subject = "This is a plain text message!",
-      text = paste("O escore de ",input$sender, "é: ", valores$escoreT),
+      subject = "Avaliação de sintomas depressivos",
+      text = paste("O escore de ",input$sender, "é: ", round(valores$escoreT)),
       html = '<html><body><img src="cid:plot"></body></html>'
     ) |> 
+      
+      
     attachment(path = "plot.png", cid = "plot")
     
     smtp(email, verbose = TRUE)
     
+    py_run_file("delete_emails.py")
+    
+  })
+  
+  observeEvent(input$calcular, {
+
+    save_image(p = thePlot(), file = 'plot.png', width = 700, height = 700)
+
   })
   
   output$download <- downloadHandler(
-    
-    filename = "plot.png",
-    
+
+    filename = "report.pdf",
+
     content = function(file) {
-      plot <- save_image(p = thePlot(), file = 'plot.png', width = 700, height = 700)
-      file.copy(plot, file)
+
+      tempReport <- file.path(tempdir(), "report.Rmd")
+
+      file.copy("report.Rmd", tempReport, overwrite = TRUE)
+      
+      pl <- thePlot()
+      
+      texto <- glue(init_text(), dep_text(), fin_text())
+      
+      params <- list(escore = valores$escoreT, nome = input$sender, plot = pl, texto = texto)
+      
+      rmarkdown::render(tempReport, output_file = file,
+        params = params,
+        envir = new.env(parent = globalenv())
+      )
+      
     }
   )
   
-  observeEvent(input$download, {
-    
-    save_image(p = thePlot(), file = 'plot.png', width = 700, height = 700)
-    
-    email <- envelope(
-      to = input$dest,
-      from = input$sender,
-      subject = "This is a plain text message!",
-      text = paste("O escore de ",input$sender, "é: ", valores$escoreT),
-      html = '<html><body><img src="cid:plot"></body></html>'
-    ) |> 
-      attachment(path = "plot.png", cid = "plot")
-    
-    smtp(email, verbose = TRUE)
-    
-  })
+  # output$download <- downloadHandler(
+  #   
+  #   filename = "plot.png",
+  #   
+  #   content = function(file) {
+  # 
+  #     plot <- save_image(p = thePlot(), file = 'plot.png', width = 700, height = 700)
+  #     
+  #     file.copy(plot, file)
+  #   }
+  # )
+
     
   output$resultado <- renderText({
     paste("O valor do escore T é: ", formatC(valores$escoreT, format = "f", digits = 2))
@@ -384,7 +298,7 @@ server <- function(input, output) {
           list(type = "line", x0 = -1, x1 = 1, y0 = 60.0, y1 = 60.0, line = list(dash = "dash", color = "#F2AA52")),
           list(type = "line", x0 = -1, x1 = 1, y0 = 70.0, y1 =70.0, line = list(dash = "dash", color = "#F23E2E"))
         ),
-        yaxis = list(range = c(0, 105), dtick= 10, title = "ScoreT", fixedrange = TRUE),
+        yaxis = list(range = c(0, 105), dtick= 10, title = "Escore T", fixedrange = TRUE),
         xaxis = list(showticklabels = FALSE, title = "Depressão", range=c(-1, 1), fixedrange = TRUE),
         dragmode = FALSE
       )

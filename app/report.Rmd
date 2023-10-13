@@ -1,0 +1,23 @@
+---
+title: "Avaliação de sintomas depressivos"
+output: pdf_document
+params:
+  escore: NA
+  nome: NA
+  plot: NA
+  texto: NA
+geometry: "top=0cm"
+---
+
+**Paciente**: `r params$nome` \hfill Data: `r format(Sys.Date(), "%d/%m/%y")`
+
+**Pontuação**: `r params$escore`
+
+```{r plot, echo=FALSE}
+save_image(p = params$plot, file = 'plot.png', width = 700, height = 700, scale = 2)
+```
+
+![](plot.png){width=475px}
+
+`r params$texto`
+

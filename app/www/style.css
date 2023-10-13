@@ -1,0 +1,105 @@
+#cism-logo, #ppg-logo, #mh-logo {
+        height: 250px;
+        width: 250px;
+        margin: 0px;
+}
+    
+@media (max-width: 600px) {
+  #cism-logo, #ppg-logo, #mh-logo {
+      display: none
+  }
+}
+
+h2 {
+    font-weight: bold; /* Título em negrito */
+    margin-bottom: 5px; /* Espaço abaixo do título */
+    color: #333; /* Cor do texto */
+}
+
+h3 {
+    font-style: italic; /* Texto em itálico */
+    margin-bottom: 5px; /* Espaço abaixo do subtítulo */
+    color: #555; /* Cor do texto */
+}
+
+/* Personalizando o painel */
+.well { 
+    background-color: #f7f8fa;     
+    border: 1px solid #e1e4e8;     /* Bordas sutis */
+    border-radius: 12px;           
+    padding: 25px;                 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);  /* Sombra leve */
+}
+
+/* Espaçamento entre os elementos */
+.form-group {                      
+    margin-bottom: 20px;
+}
+
+/* Personalização dos botões */
+button {
+    border-radius: 8px;
+    transition: background-color 0.3s, transform 0.3s; /* Transição suave para o hover */
+}
+
+button:hover {
+    background-color: #007BFF; /* Cor de hover */
+    transform: scale(1.05); /* Efeito de aumento sutil no hover */
+}
+
+/* Tipografia */
+body {
+    font-family: 'Helvetica Neue', sans-serif; 
+}
+
+#resultado {
+  font-size: 20px;
+  text-align: left;
+}
+#header-logos img {
+  margin: 50px;
+}
+
+/* ... Suas outras estilizações ... */
+
+/* Efeito de aproximação nos radiobuttons */
+input[type='radio'] {
+    transition: transform 0.3s; /* Transição suave para o hover */
+}
+
+input[type='radio']:hover {
+    transform: scale(1.2); /* Efeito de aumento sutil no hover */
+}
+
+#calcular {
+      background-color: #45C4B0;
+      color: white;
+      box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);  // Sombra leve
+}
+
+/* Cor de fundo e sombra para o gráfico */
+  .js-plotly-plot .plotly {
+    background-color: #f7f8fa;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+}
+
+/* Tipografia do gráfico */
+.js-plotly-plot .plotly text {
+    font-family: 'Helvetica Neue', sans-serif; 
+}
+
+footer {
+  text-align: center;
+  padding: 3px;
+  background-color: #f7f8fa;
+  color: black;
+  border-radius: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.footer-link {
+  color: black;
+  text-decoration: none !important;
+}
