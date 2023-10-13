@@ -189,10 +189,7 @@ server <- function(input, output) {
       subject = "Avaliação de sintomas depressivos",
       text = paste("O escore de ",input$sender, "é: ", round(valores$escoreT)),
       html = '<html><body><img src="cid:plot"></body></html>'
-    ) |> 
-      
-      
-    attachment(path = "plot.png", cid = "plot")
+    ) |> attachment(path = "plot.png", cid = "plot")
     
     smtp(email, verbose = TRUE)
     
