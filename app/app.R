@@ -5,11 +5,13 @@ library(gridExtra); library(grid); library(shinyjs)
 ### ----------------- Não Alterar ------------------------------------- ###
 
 #reticulate::use_python("C:/ProgramData/miniconda3/envs/r-reticulate")
+#reticulate::use_python("C:/Users/joao/miniconda3/envs/r-reticulate")
+
 #reticulate::use_condaenv("r-reticulate")
 #reticulate::import("kaleido")
 
-py_install(c('kaleido', 'plotly'))
-reticulate::import('kaleido')
+#py_install(c('kaleido', 'plotly'))
+#reticulate::import('kaleido')
 
 ### -------------------------------------------------------------------- ###
 
