@@ -185,7 +185,7 @@ server <- function(input, output) {
     
     email <- envelope(
       to = input$dest,
-      from = input$sender,
+      from = "mhegscoreapp@gmail.com",
       subject = "Avaliação de sintomas depressivos",
       text = paste("O escore de ",input$sender, "é: ", round(valores$escoreT)),
       html = '<html><body><img src="cid:plot"></body></html>'
