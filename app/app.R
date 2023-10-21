@@ -133,7 +133,7 @@ ui <- fluidPage(
   ),
   HTML("
        <footer>
-          <a class='footer-link' href='https://joaopacheco.quarto.pub/mental-health-epidemiology-group/'>© Mental Health Epidemiology Group</a>
+          <a class='footer-link' href='https://mheg-ufsm.github.io/website/'>© Mental Health Epidemiology Group</a>
           <p>
             Auxiliaram na construção do App: 
             <a class='footer-link' href='https://www.linkedin.com/in/andresimi/?originalSubdomain=br'>André Simioni</a> 
