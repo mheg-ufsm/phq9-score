@@ -11,7 +11,7 @@ geometry: "top=0cm"
 
 **Paciente**: `r params$nome` \hfill Data: `r format(Sys.Date(), "%d/%m/%y")`
 
-**Pontuação**: `r params$escore`
+**Pontuação**: `r round(params$escore, 2)`
 
 ```{r plot, echo=FALSE}
 save_image(p = params$plot, file = 'plot.png', width = 700, height = 700, scale = 2)

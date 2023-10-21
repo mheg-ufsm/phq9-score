@@ -10,13 +10,13 @@ library(gridExtra); library(grid); library(shinyjs)
 #reticulate::use_condaenv("r-reticulate")
 #reticulate::import("kaleido")
 
-#py_install(c('kaleido', 'plotly'))
-#reticulate::import('kaleido')
+py_install(c('kaleido', 'plotly'))
+reticulate::import('kaleido')
 
 ### -------------------------------------------------------------------- ###
 
 
-pars <- read_rds("pars.Rds")
+pars <- read_rds("params_by_age.Rds")
 
 cores <- c("green", "yellow", "orange", "darkorange", "red")
 
@@ -61,7 +61,6 @@ item <- function(id, label) {
                selected = 0)
 }
 
-
 ui <- fluidPage(
   useShinyjs(),
   tags$head(
@@ -82,19 +81,6 @@ ui <- fluidPage(
     sidebarPanel(width = 6,
                  fluidRow(
                    column(6,
-                          markdown("Durante as últimas duas semanas, com que freqüência você foi incomodado/a por qualquer um dos problemas abaixo? \n"),
-                          item("phq1", label = "1. Pouco interesse ou pouco prazer em fazer as coisas"),
-                          item("phq2", label = "2. Se sentir “para baixo”, deprimido/a ou sem perspectiva"),
-                          item("phq3", label = "3. Dificuldade para pegar no sono ou permanecer dormindo, ou dormir mais do que de costume"),
-                          item("phq4", label = "4. Se sentir cansado/a ou com pouca energia"),
-                          item("phq5", label = "5. Falta de apetite ou comendo demais")
-                   ),
-                   column(6,
-                          item("phq6", label = "6. Se sentir mal consigo mesmo/a — ou achar que você é um fracasso ou que decepcionou sua família ou você mesmo/a"),
-                          item("phq7", label = "7. Dificuldade para se concentrar nas coisas, como ler o jornal ou ver televisão"),
-                          item("phq8", label = "8. Lentidão para se movimentar ou falar, a ponto das outras pessoas perceberem? Ou o oposto – estar tão agitado/a ou irrequieto/a que você fica andando de um lado para o outro muito mais do que de costume"),
-                          item("phq9", label = "9. Pensar em se ferir de alguma maneira ou que seria melhor estar morto/a"),
-                          actionButton("calcular", "Calcular θ"),
                           textInput("sender",
                                     label = "Digite o seu nome completo:",
                                     value = "",
@@ -102,13 +88,47 @@ ui <- fluidPage(
                           textInput("dest",
                                     label = "Insira o e-mail do seu profissional de saúde mental",
                                     value = "",
-                                    placeholder = "E-mail do profissional"),
+                                    placeholder = "E-mail do profissional")
+                   ),
+                   column(6,
+                          textInput("age",
+                                    label = "Digite sua idade:",
+                                    value = "",
+                                    placeholder = "Idade (somente número)"),
+                          radioButtons("sexo", 
+                                       label = "Qual o seu sexo?", 
+                                       choices = list("Feminino" = 0,
+                                                      "Masculino" = 1),
+                                       selected = 0)
+                   )
+                 ),
+                 fluidRow(
+                   column(6,
+                          markdown("Durante as últimas duas semanas, com que freqüência você foi incomodado/a por qualquer um dos problemas abaixo? \n"),
+                          item("phq1", label = "1. Pouco interesse ou pouco prazer em fazer as coisas"),
+                          item("phq2", label = "2. Se sentir “para baixo”, deprimido/a ou sem perspectiva"),
+                          item("phq3", label = "3. Dificuldade para pegar no sono ou permanecer dormindo, ou dormir mais do que de costume"),
+                          item("phq4", label = "4. Se sentir cansado/a ou com pouca energia"),
+                          item("phq5", label = "5. Falta de apetite ou comendo demais"),
+                   ),
+                   column(6,
+                          item("phq6", label = "6. Se sentir mal consigo mesmo/a — ou achar que você é um fracasso ou que decepcionou sua família ou você mesmo/a"),
+                          item("phq7", label = "7. Dificuldade para se concentrar nas coisas, como ler o jornal ou ver televisão"),
+                          item("phq8", label = "8. Lentidão para se movimentar ou falar, a ponto das outras pessoas perceberem? Ou o oposto – estar tão agitado/a ou irrequieto/a que você fica andando de um lado para o outro muito mais do que de costume"),
+                          item("phq9", label = "9. Pensar em se ferir de alguma maneira ou que seria melhor estar morto/a"),
+                          actionButton("calcular", "Calcular θ"),
+                          
+                          
+                   ),
+                 ),
+                 fluidRow(
+                   column(6,
                           actionButton("sendemail", "Enviar e-mail!", icon = icon("envelope")),
-                          downloadButton("download", "Download", icon = icon("download"))
+                          downloadButton("download", "Download", icon = icon("download")),
+                          offset = 6
                    )
                  )
     ),
-    
     mainPanel(width = 6,
               fluidRow(
                 column(12, plotlyOutput("bargraph", height = "600px", width = "100%"))
@@ -160,8 +180,17 @@ server <- function(input, output) {
     
     theta <- try(
       {
+        
+        breaks <- c(seq(14,80, 5),Inf)
+        
+        pars_age <- 15 - length(breaks[input$age < breaks])
+        
+        if(input$sexo == 1) {
+          pars_age <- pars_age * 2
+        }
+      
         # Create generic model with desired params
-        mod_generic <- generate.mirt_object(pars, itemtype = "graded")
+        mod_generic <- generate.mirt_object(pars[[pars_age]], itemtype = "graded")
         
         # Get new theta in t score
         fscores(mod_generic, response.pattern = respostas)[1]
