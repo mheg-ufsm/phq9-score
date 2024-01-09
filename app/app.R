@@ -16,7 +16,7 @@ reticulate::import('kaleido')
 ### -------------------------------------------------------------------- ###
 
 
-pars <- read_rds("params_by_age.Rds")
+pars <- read_rds("params_by_age.rds")
 
 cores <- c("green", "yellow", "orange", "darkorange", "red")
 
@@ -181,14 +181,21 @@ server <- function(input, output) {
     theta <- try(
       {
         
-        breaks <- c(seq(14,80, 5),Inf)
+        breaks <- c(seq(15,80, 5),Inf)
         
         pars_age <- 15 - length(breaks[input$age < breaks])
         
-        if(input$sexo == 1) {
-          pars_age <- pars_age * 2
+        if(input$sexo == 0) {
+          
+          age_seq <- seq(1,28,2)
+          
+          pars_age <- age_seq[pars_age]
         }
-      
+        
+        age_seq <- seq(2,28,2)
+        
+        pars_age <- age_seq[pars_age]
+        
         # Create generic model with desired params
         mod_generic <- generate.mirt_object(pars[[pars_age]], itemtype = "graded")
         
