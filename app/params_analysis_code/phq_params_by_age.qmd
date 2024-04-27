@@ -1,0 +1,199 @@
+---
+title: "Params by age"
+format: html
+editor: source
+execute: 
+    warning: false
+    output: false
+editor_options: 
+  chunk_output_type: console
+---
+
+## Setup
+```{r}
+#| label: setup
+
+#Libraries
+pacman::p_load(readxl,tidyverse,mirt,mirtCAT, PNSIBGE, sjlabelled, sjPlot, writexl)
+
+knitr::opts_knit$set(root.dir = "C:/Users/User/Documents/mental-score")
+
+```
+
+## Importing Data
+```{r}
+#| label: importing data
+
+# Uses PNS package to retrieve data
+dadosPNS_brutos <- get_pns(year=2019, vars = c("C006","C008","N010", "N011", "N012", "N013", "N014", "N015", "N016", "N017", "N018"), design=F)
+
+# Recode variables according to PNS dictionary, rearrange column order, select only phq columns, drop missing values and transform phq scale to 0-3 (just because)
+phq9_PNS <- dadosPNS_brutos |> 
+  rename(
+    sex = C006,
+    age = C008,
+    phq3 = N010,
+    phq4 = N011,
+    phq1 = N012,
+    phq7 = N013,
+    phq5 = N014,
+    phq8 = N015,
+    phq2 = N016,
+    phq6 = N017,
+    phq9 = N018,
+  ) |> 
+  dplyr::select(age, sex, phq1, phq2, phq3, phq4, phq5, phq6, phq7, phq8, phq9) |> 
+  drop_na() |>
+  mutate(
+    across(everything(), as.numeric),
+    across(c(everything(), -sex, -age), ~ .x - 1)
+  )
+  
+```
+
+## IRT general
+
+```{r}
+# label: irt general
+
+phq_only <- phq9_PNS |> 
+  select(phq1:phq9)
+
+phq_only_model <- mirt(phq_only, itemtype = "graded")
+
+phq_only_coef <- coef(phq_only_model, IRTpars = TRUE)
+```
+
+
+## Create age groups
+```{r}
+#| label: age groups
+
+# Sample data
+ages <- phq9_PNS$age
+
+# Define breaks for the age groups
+breaks <- c(15, 19, 24, 29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 79, Inf)
+
+# Create labels for the age groups
+labels <- c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80+")
+
+# Create the new variable
+age_groups <- cut(ages, breaks = breaks, labels = labels, right = FALSE)
+
+# Incorporate the variable into the df
+phq9_PNS_ag <- phq9_PNS |> 
+  mutate(age_groups = age_groups) |> 
+  select(-age)
+
+# Sample sizes
+sample_sizes <- phq9_PNS_ag |> 
+  group_by(age_groups, sex) |> 
+  summarize(n = n()) |> 
+  ungroup()
+
+# Descriptive sample
+sample_sizes |> 
+  summarize(
+    mean = mean(n),
+    min = min(n),
+    max = max(n),
+    sd = sd(n)
+    )
+```
+
+
+## Generate params for each age group
+```{r}
+#| label: params by age
+
+# Set seed
+set.seed(123)
+
+# Split dfs by group
+phq9_by_group <- phq9_PNS_ag |> 
+  group_by(age_groups,sex) |> 
+  group_split(.keep = F) 
+
+# Create labels for the age groups and sex
+age_gender_labels <- c("15-19 Male", "15-19 Female", "20-24 Male", "20-24 Female", "25-29 Male", "25-29 Female", "30-34 Male", "30-34 Female", "35-39 Male", "35-39 Female", "40-44 Male", "40-44 Female", "45-49 Male", "45-49 Female", "50-54 Male", "50-54 Female", "55-59 Male", "55-59 Female", "60-64 Male", "60-64 Female", "65-69 Male", "65-69 Female", "70-74 Male", "70-74 Female", "75-79 Male", "75-79 Female", "80+ Male", "80+ Female")
+
+# Change list names
+names(phq9_by_group) <- age_gender_labels
+
+# Create separate mirt object for each group (df)
+mirt_objs_by_group <- map(phq9_by_group , \(x) mirt(x, itemtype = "graded"))
+
+# Calculate latent scores by age group
+scores_by_group <- map(mirt_objs_by_group , \(x) fscores(x))
+
+get_params <- function(mirt_obj) {
+  mirt_values <- mod2values(mirt_obj) |> 
+  select(item, name, value) |> 
+  filter(str_detect(item, "^phq"))
+}
+
+# Get estimated parameters by age;
+params_by_age <- map(mirt_objs_by_group , \(x) get_params(x))
+```
+
+## Export params to xlsx
+
+```{r}
+#| label: age params to xlsx
+
+params_list_age <- map(mirt_objs_by_group, \(x) coef(x, IRTpars = TRUE))
+
+df <- data.frame()
+
+
+for(param in params_list_age) {
+  for(i in 1:9) {
+    
+    data <- data.frame(param[[i]])
+    
+    df <- bind_rows(df, data)
+  }
+}
+
+rownames(df) <- NULL
+
+#define number of data frames to split into
+n <- 28
+
+#split data frame into n equal-sized data frames
+df_split <- split(df, factor(sort(rank(row.names(df))%%n)))
+
+names(df_split) <- age_gender_labels
+
+write_xlsx(df_split, "params_by_age.xlsx")
+```
+
+## Save RDS in mirt format to use in calculator
+```{r}
+# Select only columns of interest and change df orientation
+pars_wide <- function(pars_list) {
+  pars_list |> 
+    pivot_wider(names_from = name, values_from = value) |> 
+    select(-item)
+}
+
+# Apply the above function to all parameters by age
+pars_wide_by_age <- map(params_by_age, \(x) pars_wide(x))
+
+saveRDS(pars_wide_by_age, "params_by_age.rds")
+```
+
+## Validity
+```{r}
+#| label: validity
+
+# Create a generic model to estimate theta 
+generic_grm <- map(pars_wide_by_age, \(x) generate.mirt_object(x, itemtype = "graded"))
+
+# Calculate latent scores by age group
+scores_by_group_without_df <- map2(generic_grm, phq9_by_group, \(x,y) fscores(x, response.pattern = y))
+
+correlation_df_vs_generic <- map2(scores_by_group, scores_by_group_without_df, \(x,y) cor(x[,1],y[,1]))
+```
+
