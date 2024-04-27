@@ -5,7 +5,7 @@ account: mheg
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 10173002
-bundleId: 8125196
+bundleId:
 url: https://mheg.shinyapps.io/phq9-score/
 version: 1
 asMultiple: FALSE

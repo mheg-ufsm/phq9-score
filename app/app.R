@@ -38,18 +38,14 @@ perguntas <- c(
   "Pensar em se ferir de alguma maneira ou que seria melhor estar morto/a"
 )
 
-#smtp <- server(
-#  host = "smtp.gmail.com",
-#  port = 465,
-#  username = Sys.getenv("GMAIL_USERNAME"),
-#  password = Sys.getenv("GMAIL_PASSWORD")
-#)
+
+
 
 smtp <- server(
   host = "smtp.gmail.com",
   port = 465,
-  username = "mhegscoreapp@gmail.com",
-  password = "kidi gowk ujvv arkl"
+  username = Sys.getenv("username"),
+  password = Sys.getenv("password")
 )
 
 item <- function(id, label) {
