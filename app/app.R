@@ -181,14 +181,13 @@ server <- function(input, output) {
         
         pars_age <- 15 - length(breaks[input$age < breaks])
         
-        if(input$sexo == 0) {
+        if(input$sexo == 1) {
           
           age_seq <- seq(1,28,2)
           
-          pars_age <- age_seq[pars_age]
+        } else {
+          age_seq <- seq(2,28,2)
         }
-        
-        age_seq <- seq(2,28,2)
         
         pars_age <- age_seq[pars_age]
         
