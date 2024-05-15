@@ -1,8 +1,8 @@
 import imaplib
 
 # Your credentials
-email_user = 'mhegscoreapp@gmail.com'
-email_pass = 'kidi gowk ujvv arkl'
+email_user = ''
+email_pass = ''
 
 # Connect to Gmail and login
 mail = imaplib.IMAP4_SSL('imap.gmail.com')
